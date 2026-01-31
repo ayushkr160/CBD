@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "true",
 				"spark.dynamicAllocation.minExecutors": "1",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "98ca9235-cf81-4ad8-b588-dd55449faa32"
+				"spark.autotune.trackingId": "ca70be6a-4cd7-4c5b-a484-c9fc49ca33b5"
 			}
 		},
 		"metadata": {
@@ -48,27 +48,6 @@
 			"sessionKeepAliveTimeout": 30
 		},
 		"cells": [
-			{
-				"cell_type": "code",
-				"source": [
-					"input_path = \"abfss://cyber-bullying@ayushdatalakestorage.dfs.core.windows.net/raw files/user_data/\"\n",
-					"output_path = \"abfss://cyber-bullying@ayushdatalakestorage.dfs.core.windows.net/processed/parquet/user_data/\"\n",
-					"\n",
-					"df = spark.read \\\n",
-					"    .option(\"header\", \"true\") \\\n",
-					"    .option(\"inferSchema\", \"true\") \\\n",
-					"    .csv(input_path)\n",
-					"\n",
-					"df.write \\\n",
-					"  .mode(\"overwrite\") \\\n",
-					"  .parquet(output_path)\n",
-					"\n",
-					"df.show(5)\n",
-					"df.printSchema()\n",
-					""
-				],
-				"execution_count": 2
-			},
 			{
 				"cell_type": "code",
 				"source": [
@@ -109,6 +88,43 @@
 					"    # df.show(2)"
 				],
 				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Base path where your Parquet files are stored\n",
+					"base_parquet_path = \"abfss://cyber-bullying@ayushdatalakestorage.dfs.core.windows.net/processed/parquet/\"\n",
+					"\n",
+					"# List of your datasets\n",
+					"folders = [\n",
+					"    \"Aggressive_All\", \n",
+					"    \"CB_Labels\", \n",
+					"    \"Communication_Data_Among_Users\", \n",
+					"    \"Non_Aggressive_All\", \n",
+					"    \"peerness_values\",\n",
+					"    \"user_data\"\n",
+					"]\n",
+					"\n",
+					"# Database name (default is usually 'default')\n",
+					"db_name = \"cyber_bullying_db\"\n",
+					"spark.sql(f\"CREATE DATABASE IF NOT EXISTS {db_name}\")\n",
+					"\n",
+					"for folder in folders:\n",
+					"    print(f\"Creating table for: {folder}...\")\n",
+					"    \n",
+					"    # Path to the specific parquet data\n",
+					"    parquet_path = f\"{base_parquet_path}{folder}/\"\n",
+					"    \n",
+					"    # Read the parquet file to get the schema\n",
+					"    df = spark.read.parquet(parquet_path)\n",
+					"    \n",
+					"    # Create or Replace the table\n",
+					"    # This creates an 'External' table pointing to your storage\n",
+					"    df.write.mode(\"overwrite\").saveAsTable(f\"{db_name}.{folder}\")\n",
+					"\n",
+					"print(\"\\nAll tables created successfully!\")"
+				],
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
