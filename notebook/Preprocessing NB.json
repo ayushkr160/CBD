@@ -1,0 +1,122 @@
+{
+	"name": "Preprocessing NB",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "ayushsparkpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 1,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "98ca9235-cf81-4ad8-b588-dd55449faa32"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/b866d677-d747-4c2b-962f-ac85df7e113b/resourceGroups/Ayush_Project/providers/Microsoft.Synapse/workspaces/ayushsynapsedev/bigDataPools/ayushsparkpool",
+				"name": "ayushsparkpool",
+				"type": "Spark",
+				"endpoint": "https://ayushsynapsedev.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ayushsparkpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.5",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": true
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"input_path = \"abfss://cyber-bullying@ayushdatalakestorage.dfs.core.windows.net/raw files/user_data/\"\n",
+					"output_path = \"abfss://cyber-bullying@ayushdatalakestorage.dfs.core.windows.net/processed/parquet/user_data/\"\n",
+					"\n",
+					"df = spark.read \\\n",
+					"    .option(\"header\", \"true\") \\\n",
+					"    .option(\"inferSchema\", \"true\") \\\n",
+					"    .csv(input_path)\n",
+					"\n",
+					"df.write \\\n",
+					"  .mode(\"overwrite\") \\\n",
+					"  .parquet(output_path)\n",
+					"\n",
+					"df.show(5)\n",
+					"df.printSchema()\n",
+					""
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Define the base paths\n",
+					"base_input = \"abfss://cyber-bullying@ayushdatalakestorage.dfs.core.windows.net/raw files/\"\n",
+					"base_output = \"abfss://cyber-bullying@ayushdatalakestorage.dfs.core.windows.net/processed/parquet/\"\n",
+					"\n",
+					"# List of folders from your image\n",
+					"folders = [\n",
+					"    \"Aggressive_All\", \n",
+					"    \"CB_Labels\", \n",
+					"    \"Communication_Data_Among_Users\", \n",
+					"    \"Non_Aggressive_All\", \n",
+					"    \"peerness_values\",\n",
+					"    \"user_data\"\n",
+					"]\n",
+					"\n",
+					"for folder in folders:\n",
+					"    print(f\"Processing: {folder}...\")\n",
+					"    \n",
+					"    # Construct specific paths\n",
+					"    input_path = f\"{base_input}{folder}/\"\n",
+					"    output_path = f\"{base_output}{folder}/\"\n",
+					"    \n",
+					"    # Read the CSV files in the subfolder\n",
+					"    df = spark.read \\\n",
+					"        .option(\"header\", \"true\") \\\n",
+					"        .option(\"inferSchema\", \"true\") \\\n",
+					"        .csv(input_path)\n",
+					"    \n",
+					"    # Write to Parquet\n",
+					"    df.write \\\n",
+					"        .mode(\"overwrite\") \\\n",
+					"        .parquet(output_path)\n",
+					"    \n",
+					"    print(f\"Successfully saved to: {output_path}\")\n",
+					"    # Optional: Show a preview for each\n",
+					"    # df.show(2)"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
